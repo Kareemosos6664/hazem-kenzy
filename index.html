@@ -42,7 +42,7 @@ main{position:relative;z-index:1;max-width:460px;margin:0 auto;padding-inline:20
 section{position:relative;text-align:center;padding-block:44px 28px}
 .eyebrow{text-transform:uppercase;font-family:var(--caps);font-weight:600;letter-spacing:.16em;color:var(--navy);font-size:clamp(17px,4.6vw,20px);margin:0 0 14px;text-wrap:balance}
 .small-caps{font-family:var(--body);text-transform:uppercase;letter-spacing:.12em;font-size:14px;color:var(--ink);margin:0}
-.sub-caps{font-family:var(--caps);letter-spacing:.08em;color:var(--navy);font-size:15px;margin:2px 0 18px}
+.sub-caps{font-family:var(--caps);letter-spacing:.06em;color:var(--navy);font-size:clamp(12px,3.6vw,15px);margin:2px 0 18px;text-wrap:balance;overflow-wrap:anywhere}
 .edge{position:absolute;pointer-events:none;width:120px;z-index:-1}
 .edge.r{right:-46px}.edge.l{left:-46px}
 
@@ -407,11 +407,15 @@ const localDate = new Date(localY, localM, localD);
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
+function ampm(t){ // "19:00" -> "7:00 PM"
+  const m=String(t).match(/^(\d{1,2}):(\d{2})$/); if(!m) return t;
+  let h=+m[1]; const ap=h>=12?"PM":"AM"; h=h%12||12; return `${h}:${m[2]} ${ap}`;
+}
 const vals = {
   groom:CONFIG.groom, bride:CONFIG.bride,
   groomUpper:CONFIG.groom, brideUpper:CONFIG.bride,
   groomParents:CONFIG.groomParents, brideParents:CONFIG.brideParents,
-  time:`${offsetMatch[1]}:${offsetMatch[2]}`,
+  time:ampm(`${offsetMatch[1]}:${offsetMatch[2]}`),
   weekday:DAYS[localDate.getDay()], day:String(localD).padStart(2,"0"), month:MONTHS[localM], year:localY,
   dateLong:`${MONTHS[localM]} ${localD}, ${localY}`,
   venue:CONFIG.venue, address:CONFIG.address, dressCode:CONFIG.dressCode, signature:CONFIG.signature
@@ -553,7 +557,7 @@ const camIcon=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 $("#gallery").innerHTML = CONFIG.photos.map((src,i)=>`<figure class="${CONFIG.photos.length%2 && i===CONFIG.photos.length-1?"wide":""}"><img src="${src}" alt="Photo ${i+1}" loading="lazy"></figure>`).join("");
 
 /* ================== swatches + schedule ================== */
-$("#timeline").innerHTML = CONFIG.schedule.map(([t,e])=>`<li><span class="t">${esc(t)}</span><span class="dot"></span><span class="e">${esc(e)}</span></li>`).join("");
+$("#timeline").innerHTML = CONFIG.schedule.map(([t,e])=>`<li><span class="t">${esc(ampm(t))}</span><span class="dot"></span><span class="e">${esc(e)}</span></li>`).join("");
 
 /* ================== calendar ================== */
 (function(){
