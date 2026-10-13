@@ -655,14 +655,19 @@ function revealSetup(){
   function sync(){ send.href=url(); }
   nm.addEventListener("input",sync); msg.addEventListener("input",sync); sync();
   send.addEventListener("click",e=>{
+    e.preventDefault();
     const n=nm.value.trim(), m=msg.value.trim();
-    if(!n||!m){ e.preventDefault(); err.hidden=false; return; }
-    err.hidden=true; sync();
-    const box=$("#wishes");
-    setTimeout(()=>{
-      box.insertAdjacentHTML("afterbegin",`<div class="wish"><b>${esc(n)}</b><p>${esc(m)}</p><small class="sent">Sent to the couple ♡</small></div>`);
-      msg.value=""; sync();
-    },50);
+    if(!n||!m){ err.hidden=false; return; }
+    if(send.dataset.busy) return;
+    err.hidden=true; send.dataset.busy="1"; send.textContent="SENDING…";
+    const done=()=>{
+      $("#wishes").insertAdjacentHTML("afterbegin",`<div class="wish"><b>${esc(n)}</b><p>${esc(m)}</p><small class="sent">Sent to the couple ♡</small></div>`);
+      msg.value=""; sync(); send.textContent="SEND WISHES"; delete send.dataset.busy;
+    };
+    // send in the background (no new tab, no Google sign-in involved)
+    fetch(url(), {method:"GET", mode:"no-cors", credentials:"omit", cache:"no-store"})
+      .then(done)
+      .catch(()=>{ send.textContent="SEND WISHES"; delete send.dataset.busy; err.textContent="Couldn't send right now. Please check your connection and try again."; err.hidden=false; });
   });
   $("#gbForm").addEventListener("submit",e=>e.preventDefault());
 })();
